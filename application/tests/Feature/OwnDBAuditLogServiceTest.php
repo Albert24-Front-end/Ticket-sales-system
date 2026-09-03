@@ -31,7 +31,7 @@ class OwnDBAuditLogServiceTest extends TestCase
                 "parameters" => $this->castAsJson(["a" => "b"]),
                 "user_id" => 12,
                 "admin_id" => 12,
-                "cashbox_id" => 12,
+                "event_id" => 12,
             ]
         );
 

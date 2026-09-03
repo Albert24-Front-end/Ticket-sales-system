@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("action");
             $table->bigInteger('user_id')->nullable();
             $table->bigInteger('admin_id')->nullable();
-            $table->bigInteger('cashbox_id')->nullable();
+            $table->bigInteger('event_id')->nullable();
             $table->string('description')->nullable();
             $table->jsonb("parameters")->nullable();
             $table->timestamps();
