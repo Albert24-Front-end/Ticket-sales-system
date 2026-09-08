@@ -34,6 +34,18 @@ class EventController extends Controller
         return ["success" => true];
     }
 
+    public function publish(Event $event, EventService $eventService)
+    {
+        $eventService->publishEvent(auth()->user(), $event);
+        return ["success" => true];
+    }
+
+    public function cancel(Event $event, EventService $eventService) {
+        $eventService->cancelEvent(auth()->user(), $event);
+
+        return ["success" => true];
+    }
+
     public function delete(Event $event, EventService $eventService)
     {
         $eventService->deleteEvent(auth()->user(), $event);

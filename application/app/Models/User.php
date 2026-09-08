@@ -38,4 +38,9 @@ class User extends Authenticatable
             throw new \Exception('Wrong password');
         }
     }
+
+    public function organizedEvents()
+    {
+        return $this->hasMany(Event::class, "organizer_id"); // внешний ключ передаем, т.к. его название не соответствует соглашениям
+    }
 }

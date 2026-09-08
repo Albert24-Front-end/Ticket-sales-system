@@ -13,12 +13,18 @@ class EventCreationRequest extends FormRequest
         return [
             "name" => ["required", "string", "max:255"],
             "description" => ["required", "string"],
-            "started_at" => ["required", "date"],
+            "started_at" => ["required", "date", "after:now",],
             "ended_at" => ["required", "date", "after:started_at"],
-            "location" => ["required", "string", "max:255"],
-            "organizer" => ["required", "string"],
-            "category" => ["required", "string", "max:255"],
-            "status" => ["required", "string", "max:255"],
+            "category_id" => [
+                "required",
+                "integer",
+                "exists:categories,id",
+            ],
+            "venue_id" => [
+                "required",
+                "integer",
+                "exists:venues,id",
+            ],
         ];
     }
 
@@ -29,7 +35,6 @@ class EventCreationRequest extends FormRequest
 
     public function toDTO(): EventData
     {
-        return new EventData(...$this->except('status'),
-            status: EventStatus::from($this->input('status', 'draft')));
+        return new EventData(...$this->validated());
     }
 }

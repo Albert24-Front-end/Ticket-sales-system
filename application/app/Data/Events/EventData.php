@@ -11,10 +11,8 @@ class EventData
         public string      $description,
         public string      $started_at,
         public string      $ended_at,
-        public string      $location,
-        public string      $organizer,
-        public string      $category,
-        public EventStatus $status = EventStatus::DRAFT,
+        public int         $venue_id,
+        public int         $category_id,
     )
     {}
 }
