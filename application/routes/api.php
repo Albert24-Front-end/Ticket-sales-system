@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\VenueController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,5 +50,36 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete("/{event}", [EventController::class, "delete"])
                 ->middleware("can:delete,event")
                 ->name("delete");
-            });
+        });
+    Route::prefix("/categories")
+        ->as("categories.")
+        ->group(function () {
+            Route::get("/", [CategoryController::class, "index"])
+                ->name("index");
+
+            Route::post("/", [CategoryController::class, "create"])
+                ->name("create");
+
+            Route::put("/{category}", [CategoryController::class, "update"])
+                ->name("update");
+
+            Route::delete("/{category}", [CategoryController::class, "delete"])
+                ->name("delete");
+        });
+
+    Route::prefix("/venues")
+        ->as("venues.")
+        ->group(function () {
+            Route::get("/", [VenueController::class, "index"])
+                ->name("index");
+
+            Route::post("/", [VenueController::class, "create"])
+                ->name("create");
+
+            Route::put("/{venue}", [VenueController::class, "update"])
+                ->name("update");
+
+            Route::delete("/{venue}", [VenueController::class, "delete"])
+                ->name("delete");
+        });
 });

@@ -12,8 +12,8 @@ class Venue extends Model
 {
     use SoftDeletes, HasFactory;
 
-//    public function events()
-//    {
-//        return $this->hasMany(Event::class);
-//    }
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

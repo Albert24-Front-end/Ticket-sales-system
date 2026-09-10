@@ -208,7 +208,7 @@ class EventTest extends TestCase
         $this->assertLog(
             "event_published",
             user_id: $user->id,
-            event_id: $event->id,
+            event_id: $event->id
         );
     }
 
