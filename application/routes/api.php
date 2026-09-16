@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\VenueController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,26 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete("/{event}", [EventController::class, "delete"])
                 ->middleware("can:delete,event")
                 ->name("delete");
+
+            Route::scopeBindings()
+                ->prefix("/{event}/ticket-types")
+                ->as("ticketTypes.")
+                ->group(function () {
+                    Route::get("/", [TicketTypeController::class, "index"])
+                        ->name("index");
+
+                    Route::post("/", [TicketTypeController::class, "create"])
+                        ->middleware("can:update,event")
+                        ->name("create");
+
+                    Route::put("/{ticketType}", [TicketTypeController::class, "update"])
+                        ->middleware("can:update,event")
+                        ->name("update");
+
+                    Route::delete("/{ticketType}", [TicketTypeController::class, "delete"])
+                        ->middleware("can:update,event")
+                        ->name("delete");
+                });
         });
     Route::prefix("/categories")
         ->as("categories.")
