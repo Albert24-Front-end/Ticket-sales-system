@@ -23,6 +23,10 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
         });
+
+        Schema::table('ticket_types', function (Blueprint $table) {
+            $table->integer("reserved_quantity")->default(0);
+        });
     }
 
     /**
@@ -31,5 +35,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists("ticket_types");
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('users_status');
+        });
     }
 };

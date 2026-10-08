@@ -45,7 +45,7 @@ class EventTest extends TestCase
             "description" => "Test Description",
             "category_id" => $category->id,
             "venue_id" => $venue->id,
-            "status" => EventStatus::DRAFT->value,
+            "status" => EventStatus::DRAFT,
         ]);
 
         $event = Event::query()

@@ -15,12 +15,12 @@ class EventPolicy
         //
     }
 
-    public function update(User $user, Event $event)
+    public function update(User $user, Event $event): bool
     {
         return $user->id === $event->organizer_id;
     }
 
-    public function delete(User $user, Event $event)
+    public function delete(User $user, Event $event): bool
     {
         return $user->id === $event->organizer_id;
     }
