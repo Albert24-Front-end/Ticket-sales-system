@@ -35,6 +35,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function payment(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function ticketTypes(): belongsToMany
     {
         return $this->belongsToMany(TicketType::class, 'order_items')
