@@ -23,7 +23,7 @@ class OrderCreationRequest extends FormRequest
                 "exists:ticket_types,id",
             ],
 
-            "items.*.ticket_quantity" => [
+                    "items.*.ticket_quantity" => [
                 "required",
                 "integer",
                 "min:1",

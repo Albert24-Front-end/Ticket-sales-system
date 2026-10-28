@@ -110,6 +110,58 @@ class OrderTest extends TestCase
         $this->assertLog("order_created", user_id: $this->user->id, event_id: $this->event->id);
     }
 
+    public function testPreventServerOrderDataForgery(): void
+    {
+        $otherUser = User::factory()->create();
+        $otherEvent = Event::factory()->create(["status" => EventStatus::PUBLISHED]);
+        $standardTicket = TicketType::factory()->create([
+            "event_id" => $this->event->id,
+            "price" => 100_000,
+            "quantity" => 100,
+            "sold_quantity" => 0,
+            "reserved_quantity" => 0,
+        ]);
+
+        $response = $this->actingAs($this->user)->postJson("/api/events/{$this->event->id}/orders", [
+            "user_id" => $otherUser->id,
+            "event_id" => $otherEvent->id,
+            "total_amount" => 1,
+            "status" => OrderStatus::PAID->value,
+            "items" => [
+                [
+                    "ticket_type_id" => $standardTicket->id,
+                    "ticket_quantity" => 2,
+                    "unit_price" => 1,
+                ],
+            ],
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath("data.status", OrderStatus::PENDING->value);
+        $response->assertJsonPath("data.total_amount", 200_000);
+
+        $this->assertDatabaseCount("orders", 1);
+        $this->assertDatabaseHas("orders", [
+            "id" => $response->json("data.order_id"),
+            "user_id" => $this->user->id,
+            "event_id" => $this->event->id,
+            "total_amount" => 200_000,
+            "status" => OrderStatus::PENDING->value,
+        ]);
+
+        $this->assertDatabaseCount("order_items", 1);
+        $this->assertDatabaseHas("order_items", [
+            "order_id" => $response->json("data.order_id"),
+            "ticket_type_id" => $standardTicket->id,
+            "quantity" => 2,
+            "unit_price" => 100_000,
+        ]);
+
+        $standardTicket->refresh();
+        $this->assertEquals(2, $standardTicket->reserved_quantity);
+        $this->assertEquals(0, $standardTicket->sold_quantity);
+    }
+
     public static function unavailableEventStatuses(): array
     {
         return [
@@ -130,7 +182,7 @@ class OrderTest extends TestCase
         ]);
 
         $vipTicket = TicketType::factory()->create([
-            "event_id" => $this->event->id,
+            "event_id" => $event->id,
             "price" => 250_000,
             "quantity" => 50,
             "sold_quantity" => 0,

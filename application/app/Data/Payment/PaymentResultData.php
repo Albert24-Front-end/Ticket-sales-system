@@ -2,10 +2,9 @@
 
 namespace App\Data\Payment;
 
-class PaymentResultData
+readonly class PaymentResultData
 {
     public function __construct(
-        public string $paymentId,
         public string $paymentUrl,
     )
     {}

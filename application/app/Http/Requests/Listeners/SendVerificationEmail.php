@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Http\Requests\Listeners;
 
 use App\Services\AuthService;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class SendVerificationEmail
 {

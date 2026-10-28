@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(["order_id", "external_payment_id", "status", "amount", "payment_url"])]
+#[Fillable(["order_id", "cashbox_id", "status", "amount", "payment_url"])]
 class Payment extends Model
 {
+//    Payment — локальная запись: какой внешний платёж относится к какому Order и в каком состоянии его видим.
     use HasFactory;
     protected function casts(): array
     {

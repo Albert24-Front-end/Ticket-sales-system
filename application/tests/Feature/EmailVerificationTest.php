@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Listeners\SendVerificationEmail;
+use App\Http\Requests\Listeners\SendVerificationEmail;
 use App\Mail\EmailVerification;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -23,7 +22,7 @@ class EmailVerificationTest extends TestCase
     public function testHasListener()
     {
         \Event::fake();
-        \Event::assertListening(Registered::class, \App\Listeners\SendVerificationEmail::class);
+        \Event::assertListening(Registered::class, \App\Http\Requests\Listeners\SendVerificationEmail::class);
     }
 
     public function testVerificationEmailSent()

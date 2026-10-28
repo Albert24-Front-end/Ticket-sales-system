@@ -108,4 +108,117 @@ class OrderService
             ->orderByDesc("created_at")
             ->get();
     }
+
+    private function confirmReservation(Order $order): void
+    {
+        $orderItems = $order->orderItems->orderBy("ticket_type_id")->get();
+
+        foreach($orderItems as $orderItem) {
+            $ticketType = TicketType::query()
+                ->whereKey($orderItem->ticket_type_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $ticketType->reserved_quantity
+                < $orderItem->quantity
+            ) {
+                throw ValidationException::withMessages([
+                    "order" =>
+                        "Reserved ticket quantity is inconsistent.",
+                ]);
+            }
+
+            $ticketType->decrement(
+                "reserved_quantity",
+                $orderItem->quantity
+            );
+            $ticketType->increment(
+                "sold_quantity",
+                $orderItem->quantity
+            );
+        }
+    }
+
+    public function markOrderAsPaid(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $order = Order::query()
+                ->whereKey($order->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            //  обеспечиваем идемпотентность: повторный success webhook ничего во второй раз не продаёт
+            if ($order->status === OrderStatus::PAID) {
+                return;
+            }
+
+            // обеспечиваем единственный нормальный переход
+            if ($order->status !== OrderStatus::PENDING) {
+                throw ValidationException::withMessages([
+                    "order" => "Order is not pending.",
+                ]);
+            }
+
+            $this->confirmReservation($order);
+            $order->update([
+                "status" => OrderStatus::PAID,
+            ]);
+        });
+    }
+
+    private function releaseReservation(Order $order): void
+    {
+        $orderItems = $order->orderItems->orderBy("ticket_type_id")->get();
+        foreach ($orderItems as $orderItem) {
+            $ticketType = TicketType::query()
+                ->whereKey($orderItem->ticket_type_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $ticketType->reserved_quantity
+                < $orderItem->quantity
+            ) {
+                throw ValidationException::withMessages([
+                    "order" =>
+                        "Reserved ticket quantity is inconsistent.",
+                ]);
+            }
+
+            $ticketType->decrement(
+                "reserved_quantity",
+                $orderItem->quantity
+            );
+        }
+    }
+
+    public function cancelOrder(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $order = Order::query()
+                ->whereKey($order->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            // повторный failed webhook
+            if ($order->status === OrderStatus::CANCELLED) {
+                return;
+            }
+
+            // оплаченный заказ отменять таким webhook уже нельзя
+            if (
+                $order->status !== OrderStatus::PENDING
+            ) {
+                throw ValidationException::withMessages([
+                    "order" =>
+                        "Only a pending order can be cancelled.",
+                ]);
+            }
+            $this->releaseReservation($order);
+            $order->update([
+                "status" => OrderStatus::CANCELLED,
+            ]);
+
+        });
+    }
 }

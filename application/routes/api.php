@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\VenueController;
 use Illuminate\Http\Request;
@@ -114,4 +115,5 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete("/{venue}", [VenueController::class, "delete"])
                 ->name("delete");
         });
+    Route::post("/payment/pay/{order}", [PaymentController::class, "pay"])->name("pay");
 });

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 #[Fillable(["user_id", "event_id", "status", "total_amount"])]
 class Order extends Model
 {
@@ -35,9 +37,9 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function payment(): HasMany
+    public function payment(): HasOne
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasOne(Payment::class);
     }
 
     public function ticketTypes(): belongsToMany
