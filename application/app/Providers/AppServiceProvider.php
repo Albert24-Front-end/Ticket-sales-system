@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Event::listen(
+            \Illuminate\Auth\Events\Registered::class,
+            \App\Http\Requests\Listeners\SendVerificationEmail::class,
+        );
         RateLimiter::for("reg", function (Request $request) {
             return Limit::perMinutes(30, 10)->by($request->ip());
         });

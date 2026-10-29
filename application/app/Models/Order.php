@@ -51,4 +51,9 @@ class Order extends Model
             ])
             ->withTimestamps();
     }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
 }

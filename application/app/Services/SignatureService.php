@@ -17,6 +17,6 @@ class SignatureService implements SignatureContract
     public function checkSignature(array $data, string $key, string $ctrlSignature): bool
     {
         $recalculatedSignature = $this->sign($data, $key);
-        return hash_equals($ctrlSignature, $recalculatedSignature);
+        return hash_equals($recalculatedSignature, $ctrlSignature);
     }
 }

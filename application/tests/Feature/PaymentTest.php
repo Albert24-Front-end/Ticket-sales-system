@@ -14,6 +14,7 @@ class PaymentTest extends TestCase
     /**
      * A basic feature test example.
      */
+    use RefreshDatabase, WithFaker;
     public function testPaymentSuccessfulCreation(): void
     {
         $user = User::factory()->create();

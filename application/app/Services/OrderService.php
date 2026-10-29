@@ -12,6 +12,7 @@ use App\Models\TicketType;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Events\OrderPaid;
 
 class OrderService
 {
@@ -111,7 +112,8 @@ class OrderService
 
     private function confirmReservation(Order $order): void
     {
-        $orderItems = $order->orderItems->orderBy("ticket_type_id")->get();
+        $orderItems = $order->orderItems()->orderBy("ticket_type_id")->get();
+        // $orderItems = $order->orderItems->orderBy("ticket_type_id")->get(); // orderItems без скобок - уже загруженная коллекция позиций, со скобками - отношение HasMany query builder как метод, через которое можно строить SQL-запрос для получения коллекции - query-collection, см. Eloquent
 
         foreach($orderItems as $orderItem) {
             $ticketType = TicketType::query()
@@ -148,7 +150,7 @@ class OrderService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            //  обеспечиваем идемпотентность: повторный success webhook ничего во второй раз не продаёт
+            //  обеспечиваем идемпотентность: повторный success webhook ничего во второй раз не продаёт, OrderPaid не отправляется
             if ($order->status === OrderStatus::PAID) {
                 return;
             }
@@ -164,12 +166,15 @@ class OrderService
             $order->update([
                 "status" => OrderStatus::PAID,
             ]);
+
+            // сообщаем об оплате заказ всей системе, это событие попадет к listeners только после успешного завершения транзакции
+            OrderPaid::dispatch($order->refresh());
         });
     }
 
     private function releaseReservation(Order $order): void
     {
-        $orderItems = $order->orderItems->orderBy("ticket_type_id")->get();
+        $orderItems = $order->orderItems()->orderBy("ticket_type_id")->get();
         foreach ($orderItems as $orderItem) {
             $ticketType = TicketType::query()
                 ->whereKey($orderItem->ticket_type_id)

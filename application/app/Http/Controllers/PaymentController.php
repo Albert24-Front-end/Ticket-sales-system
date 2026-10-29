@@ -6,6 +6,8 @@ use App\Http\Requests\Payment\PaymentWebhookRequest;
 use App\Models\Order;
 use App\Services\Payments\PaymentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PaymentController extends Controller
 {
@@ -20,16 +22,14 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function webhook(PaymentWebhookRequest $request, PaymentService $paymentService): JsonResponse
+    public function handleWebhook(PaymentWebhookRequest $request, PaymentService $paymentService): Response
     {
-        $item = $paymentService->processWebhook($request->toDTO());
-        return response()->json([
-            "success" => true,
-            "data" => [
-                "order_id" => $item->order_id,
-                "amount" => $item->amount,
-                "status" => $item->status
-            ]
-        ]);
+        // выдаем ответ 204 No content
+        $signature = $request->header("X-Signature");
+        if (!is_string($signature)) {
+            throw new HttpException(401, "X-Signature header is missing");
+        }
+        $paymentService->processWebhook($request->toDTO(), $signature);
+        return response()->noContent();
     }
 }

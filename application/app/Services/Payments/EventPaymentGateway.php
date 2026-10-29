@@ -5,12 +5,7 @@ namespace App\Services\Payments;
 use App\Contracts\PaymentGatewayContract;
 use App\Contracts\SignatureContract;
 use App\Data\Payment\PaymentResultData;
-use App\Http\Requests\Order\OrderCreationRequest;
-use App\Models\Event;
 use App\Models\Order;
-use App\Models\Payment;
-use App\Services\OrderService;
-use App\Services\SignatureService;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -18,6 +13,7 @@ class EventPaymentGateway implements PaymentGatewayContract
 {
     public function __construct(
         private readonly SignatureContract $signatureService,
+        private readonly PaymentAmountConverter $converter
     )
     {}
     public function createPayment(Order $order): PaymentResultData
@@ -30,7 +26,7 @@ class EventPaymentGateway implements PaymentGatewayContract
         $data = [
             "cashbox_id" => (int) config("payment.cashbox_id"),
             "order_id" => (string) $order->id,
-            "amount" => (int) $order->total_amount,
+            "amount" => $this->converter->toTiyin((int) $order->total_amount),
             "description" => "Order #{$order->id}",
         ];
         $signatureService = $this->signatureService;
